@@ -1,0 +1,3 @@
+require version-baseband=4.3.1.c5-00105-MANNAR_GEN_PACK-1.9283.59
+require version-trustzone=TZ.XF.5.1-15715-3
+require version-vendor=1671646614
