@@ -8,8 +8,8 @@
 
 set -e
 
-DEVICE=avicii
-VENDOR=oneplus
+DEVICE=holi
+VENDOR=qualcomm
 
 # Load extract_utils and do some sanity checks
 MY_DIR="${BASH_SOURCE%/*}"
