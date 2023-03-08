@@ -8,8 +8,8 @@
 
 set -e
 
-DEVICE=holi
-VENDOR=qualcomm
+DEVICE=qti
+VENDOR=holi
 
 # Load extract_utils and do some sanity checks
 MY_DIR="${BASH_SOURCE%/*}"
@@ -29,7 +29,6 @@ setup_vendor "${DEVICE}" "${VENDOR}" "${ANDROID_ROOT}"
 
 # Warning headers and guards
 write_headers
-
 
 write_makefiles "${MY_DIR}/proprietary-files.txt" true
 
