@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (C) 2018-2019 The LineageOS Project
+# Copyright (C) 2018 The LineageOS Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,72 +17,62 @@
 
 set -e
 
-# Required!
-export DEVICE=CPH2381
-export VENDOR=oneplus
+# Store project path
+PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." >/dev/null && pwd )"
 
-export DEVICE_BRINGUP_YEAR=2023
+# Prepare blobs list
+if [ ! -e $PROJECT_DIR/working/proprietary-files.txt ]; then
+    echo "Preparing proprietary-files.txt"
+    bash $PROJECT_DIR/tools/proprietary-files.sh "$1" > /dev/null 2>&1
+fi
+
+# Set values
+source $PROJECT_DIR/helpers/rom_vars.sh "$1"
+DEVICE="$CPH2381"
+VENDOR="$oneplus"
 
 # Load extract_utils and do some sanity checks
 MY_DIR="${BASH_SOURCE%/*}"
-if [[ ! -d "${MY_DIR}" ]]; then MY_DIR="${PWD}"; fi
+if [[ ! -d "$MY_DIR" ]]; then MY_DIR="$PWD"; fi
 
-LINEAGE_ROOT="${MY_DIR}"/../../..
+LINEAGE_ROOT="$PROJECT_DIR"
 
-HELPER="${LINEAGE_ROOT}/vendor/lineage/build/tools/extract_utils.sh"
-if [ ! -f "${HELPER}" ]; then
-    echo "Unable to find helper script at ${HELPER}"
+if [[ "$VERSION" -lt 10 ]]; then
+    HELPER="$LINEAGE_ROOT"/helpers/extract_blobs/extract_utils_pie.sh
+else
+    HELPER="$LINEAGE_ROOT"/helpers/extract_blobs/extract_utils.sh
+fi
+
+if [ ! -f "$HELPER" ]; then
+    echo "Unable to find helper script at $HELPER"
     exit 1
 fi
-source "${HELPER}"
+. "$HELPER"
 
 # Default to sanitizing the vendor folder before extraction
 CLEAN_VENDOR=true
 
-SECTION=
-KANG=
-
-while [ "${#}" -gt 0 ]; do
-    case "${1}" in
-        -n | --no-cleanup )
-                CLEAN_VENDOR=false
-                ;;
-        -k | --kang )
-                KANG="--kang"
-                ;;
-        -s | --section )
-                SECTION="${2}"; shift
-                CLEAN_VENDOR=false
-                ;;
-        * )
-                SRC="${1}"
-                ;;
+while [ "$1" != "" ]; do
+    case $1 in
+        -n | --no-cleanup )     CLEAN_VENDOR=false
+                                ;;
+        -s | --section )        shift
+                                SECTION=$1
+                                CLEAN_VENDOR=false
+                                ;;
+        * )                     SRC=$1
+                                ;;
     esac
     shift
 done
 
-if [ -z "${SRC}" ]; then
-    SRC="adb"
+if [ -z "$SRC" ]; then
+    SRC=adb
 fi
 
-setup_vendor "${DEVICE}" "${VENDOR}" "${LINEAGE_ROOT}" false "${CLEAN_VENDOR}"
-extract "${MY_DIR}/../${DEVICE}/proprietary-files.txt" "${SRC}" \
-        "${KANG}" --section "${SECTION}"
+# Initialize the helper
+setup_vendor "$DEVICE" "$VENDOR" "$LINEAGE_ROOT" false "$CLEAN_VENDOR"
 
-BLOB_ROOT="${LINEAGE_ROOT}/vendor/${VENDOR}/${DEVICE}/proprietary"
+extract $PROJECT_DIR/working/proprietary-files.txt "$SRC" "$SECTION"
 
-sed -i "s/android.hidl.base@1.0.so/libhidlbase.so\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00/" "${BLOB_ROOT}/lib64/libwfdnative.so"
-
-#
-# Fix xml version
-#
-function fix_xml_version () {
-    sed -i \
-        's/xml version="2.0"/xml version="1.0"/' \
-        "$BLOB_ROOT"/"$1"
-}
-
-fix_xml_version product/etc/permissions/vendor.qti.hardware.data.connection-V1.0-java.xml
-fix_xml_version product/etc/permissions/vendor.qti.hardware.data.connection-V1.1-java.xml
-
-"${MY_DIR}/setup-makefiles.sh"
+. "$MY_DIR"/setup-makefiles.sh
