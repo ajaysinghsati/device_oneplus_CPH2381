@@ -8,8 +8,8 @@
 
 set -e
 
-DEVICE=qti
-VENDOR=holi
+DEVICE=oneplus
+VENDOR=CPH2381
 
 # Load extract_utils and do some sanity checks
 MY_DIR="${BASH_SOURCE%/*}"
