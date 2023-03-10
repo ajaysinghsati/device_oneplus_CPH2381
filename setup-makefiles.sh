@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (C) 2018-2019 The LineageOS Project
+# Copyright (C) 2018 The LineageOS Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,34 +17,39 @@
 
 set -e
 
-# Required!
-export DEVICE=CPH2381
-export VENDOR=oneplus
+# Store project path
+PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." >/dev/null && pwd )"
 
-export DEVICE_BRINGUP_YEAR=2023
+# Required!
+DEVICE="$CPH2381"
+VENDOR="$oneplus"
+
+INITIAL_COPYRIGHT_YEAR=$( date +"%Y" )
 
 # Load extract_utils and do some sanity checks
 MY_DIR="${BASH_SOURCE%/*}"
-if [[ ! -d "${MY_DIR}" ]]; then MY_DIR="${PWD}"; fi
+if [[ ! -d "$MY_DIR" ]]; then MY_DIR="$PWD"; fi
 
-LINEAGE_ROOT="${MY_DIR}/../../.."
+LINEAGE_ROOT="$PROJECT_DIR"
 
-HELPER="${LINEAGE_ROOT}/vendor/lineage/build/tools/extract_utils.sh"
-if [ ! -f "${HELPER}" ]; then
-    echo "Unable to find helper script at ${HELPER}"
+if [[ "$VERSION" -lt 10 ]]; then
+    HELPER="$LINEAGE_ROOT"/helpers/extract_blobs/extract_utils_pie.sh
+else
+    HELPER="$LINEAGE_ROOT"/helpers/extract_blobs/extract_utils.sh
+fi
+if [ ! -f "$HELPER" ]; then
+    echo "Unable to find helper script at $HELPER"
     exit 1
 fi
-source "${HELPER}"
+. "$HELPER"
 
-# Initialize the helper for device
-INITIAL_COPYRIGHT_YEAR="$DEVICE_BRINGUP_YEAR"
-setup_vendor "${DEVICE}" "${VENDOR}" "${LINEAGE_ROOT}" false
+# Initialize the helper
+setup_vendor "$DEVICE" "$VENDOR" "$LINEAGE_ROOT"
 
 # Copyright headers and guards
 write_headers
 
-# The standard device blobs
-write_makefiles "${MY_DIR}/proprietary-files.txt" true
+write_makefiles $PROJECT_DIR/working/proprietary-files.txt true
 
 # Finish
 write_footers
