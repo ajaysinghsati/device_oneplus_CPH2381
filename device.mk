@@ -24,9 +24,7 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/audio/sound_trigger_platform_info.xml:$(TARGET_COPY_OUT_VENDOR)/etc/sound_trigger_platform_info.xml \
     $(LOCAL_PATH)/audio/usb_audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/usb_audio_policy_configuration.xml \
 
-# Exclude sensor from InputManager
-PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/excluded-input-devices.xml:system/etc/excluded-input-devices.xml \
+
 
 # GPS
 PRODUCT_COPY_FILES += \
@@ -39,12 +37,9 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/gps/xtwifi.conf:$(TARGET_COPY_OUT_VENDOR)/etc/xtwifi.conf \
 
 # IRQ
-PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/msm_irqbalance.conf:$(TARGET_COPY_OUT_VENDOR)/etc/msm_irqbalance.conf \
+
 
 # IRSC
-PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/sec_config:$(TARGET_COPY_OUT_VENDOR)/etc/sec_config \
 
 # Keylayout
 PRODUCT_COPY_FILES += \
